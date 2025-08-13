@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "hot-list-app",
-    "slug": "看看今天又发生了一些什么新鲜事",
+    "slug": "hot-list-app",
     "platforms": [
       "ios",
       "android"
@@ -18,7 +18,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.alterem.hotlistapp"
+      "bundleIdentifier": "com.alterem.hotlistapp",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,6 +30,12 @@
       },
       "package": "com.alterem.hotlistapp",
       "edgeToEdgeEnabled": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d1337f62-5626-43c7-bd74-21819f74953b"
+      }
+    },
+    "owner": "alterem"
   }
 }
