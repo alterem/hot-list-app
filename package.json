@@ -6,7 +6,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "prebuild": "expo prebuild --platform android --clear",
+    "prebuild": "expo prebuild --platform android --clean",
     "build": "cd android && ./gradlew assembleRelease"
   },
   "dependencies": {
