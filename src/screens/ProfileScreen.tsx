@@ -10,9 +10,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../types';
+
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList>;
 
 export default function ProfileScreen() {
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const navigation = useNavigation<ProfileScreenNavigationProp>();
 
   const handleTakePhoto = async () => {
     try {
@@ -44,6 +50,10 @@ export default function ProfileScreen() {
   const handleMenuPress = (title: string) => {
     if (title === '编辑资料') {
       handleTakePhoto();
+    } else if (title === '帮助') {
+      navigation.navigate('Help');
+    } else if (title === '关于') {
+      navigation.navigate('About');
     } else {
       Alert.alert('提示', `您点击了 ${title}`);
     }
@@ -73,7 +83,7 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.userName}>用户名</Text>
         <Text style={styles.userEmail}>alterem@alterem.com</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.editButton}
           onPress={() => handleMenuPress('编辑资料')}
         >
@@ -108,10 +118,10 @@ export default function ProfileScreen() {
             onPress={() => handleMenuPress(item.title)}
           >
             <View style={styles.menuLeft}>
-              <Ionicons 
-                name={item.icon as any} 
-                size={24} 
-                color="#666" 
+              <Ionicons
+                name={item.icon as any}
+                size={24}
+                color="#666"
                 style={styles.menuIcon}
               />
               <View style={styles.menuText}>
@@ -125,7 +135,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* 退出登录按钮 */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.logoutButton}
         onPress={() => Alert.alert('确认', '确定要退出登录吗？')}
       >

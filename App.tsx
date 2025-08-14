@@ -9,6 +9,8 @@ import Toast from 'react-native-toast-message';
 import HomeScreen from './src/screens/HomeScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import WebViewScreen from './src/screens/WebViewScreen';
+import HelpScreen from './src/screens/HelpScreen';
+import AboutScreen from './src/screens/AboutScreen';
 import { RootStackParamList, RootTabParamList } from './src/types';
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -33,7 +35,7 @@ function MainTabs() {
         tabBarActiveTintColor: '#34C759',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
-          height: 65, 
+          height: 65,
         },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
@@ -50,16 +52,16 @@ function MainTabs() {
         },
       })}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
         options={{
           title: '首页',
           headerTitle: '热榜',
         }}
       />
-      <Tab.Screen 
-        name="Profile" 
+      <Tab.Screen
+        name="Profile"
         component={ProfileScreen}
         options={{
           title: '我的',
@@ -87,6 +89,22 @@ export default function App() {
             name="WebView"
             component={WebViewScreen}
             options={{
+              headerBackTitle: '返回',
+            }}
+          />
+          <Stack.Screen
+            name="Help"
+            component={HelpScreen}
+            options={{
+              title: '帮助中心',
+              headerBackTitle: '返回',
+            }}
+          />
+          <Stack.Screen
+            name="About"
+            component={AboutScreen}
+            options={{
+              title: '关于',
               headerBackTitle: '返回',
             }}
           />

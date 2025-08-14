@@ -8,6 +8,8 @@ export type RootTabParamList = {
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<RootTabParamList>;
   WebView: { url: string; title: string };
+  Help: undefined;
+  About: undefined;
 };
 
 export interface HotListSource {

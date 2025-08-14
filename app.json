@@ -20,7 +20,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.alterem.hotlistapp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "此应用需要访问相机来拍摄和更新您的头像照片"
       }
     },
     "android": {
@@ -29,8 +30,19 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.alterem.hotlistapp",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "此应用需要访问相机来拍摄和更新您的头像照片"
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "d1337f62-5626-43c7-bd74-21819f74953b"

@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   moreButton: {
-    paddingHorizontal: 15,
+    paddingHorizontal: 8,
     paddingVertical: 10,
   },
   typeButton: {
