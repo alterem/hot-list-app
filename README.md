@@ -67,3 +67,10 @@
 - [TypeScript](https://www.typescriptlang.org/)
 - [Expo Vector Icons](https://docs.expo.dev/guides/icons/)
 - [React Native WebView](https://github.com/react-native-webview/react-native-webview)
+
+
+## 📦 关于打包
+
+iOS 编译：[iOSBuildSetup](./docs/ios-build-setup.md)
+
+Android 编译: github Action 执行 build-api
