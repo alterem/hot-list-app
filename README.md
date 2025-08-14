@@ -35,8 +35,8 @@
     ```
     或者，您可以针对特定平台运行：
     ```bash
-    npm run ios
-    npm run android
+    pnpm run ios
+    pnpm run android
     ```
     启动后，Expo DevTools 会在您的浏览器中打开。您可以使用 Expo Go 应用扫描二维码，在您的手机上运行此应用。
 
