@@ -31,6 +31,24 @@ type HomeScreenNavigationProp = CompositeNavigationProp<
 
 const MODAL_MAX_HEIGHT = Dimensions.get('window').height * 0.7;
 
+// 常量定义
+const COLORS = {
+  primary: '#34C759',
+  background: '#f5f5f5',
+  white: '#ffffff',
+  text: '#333',
+  textSecondary: '#666',
+  textLight: '#999',
+  border: '#e0e0e0',
+  borderLight: '#f0f0f0',
+} as const;
+
+const PERFORMANCE_CONFIG = {
+  maxToRenderPerBatch: 10,
+  windowSize: 10,
+  removeClippedSubviews: true,
+} as const;
+
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [sources, setSources] = useState<HotListSource[]>([]);
@@ -71,7 +89,31 @@ export default function HomeScreen() {
     }
   }, [hotListData, navigation]);
 
-  const fetchSources = async () => {
+  // 提取错误处理函数
+  const showError = useCallback((message: string) => {
+    Alert.alert('错误', message);
+  }, []);
+
+  const fetchHotList = useCallback(async (path: string) => {
+    setLoadingList(true);
+    setHotListData(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}${path}`);
+      const data: HotListData = await response.json();
+      if (data.code === 200) {
+        setHotListData(data);
+      } else {
+        showError(data.message || '获取热榜数据失败');
+      }
+    } catch (error) {
+      showError('获取热榜数据失败，请检查网络连接');
+    } finally {
+      setLoadingList(false);
+      setRefreshing(false);
+    }
+  }, [showError]);
+
+  const fetchSources = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/all`);
       const data = await response.json();
@@ -86,33 +128,14 @@ export default function HomeScreen() {
           fetchHotList(firstSource.path);
         }
       } else {
-        Alert.alert('错误', '获取热榜来源格式不正确');
+        showError('获取热榜来源格式不正确');
       }
     } catch (error) {
-      Alert.alert('错误', '获取热榜来源失败，请检查网络连接');
+      showError('获取热榜来源失败，请检查网络连接');
     } finally {
       setLoadingSources(false);
     }
-  };
-
-  const fetchHotList = useCallback(async (path: string) => {
-    setLoadingList(true);
-    setHotListData(null);
-    try {
-      const response = await fetch(`${API_BASE_URL}${path}`);
-      const data: HotListData = await response.json();
-      if (data.code === 200) {
-        setHotListData(data);
-      } else {
-        Alert.alert('错误', data.message || '获取热榜数据失败');
-      }
-    } catch (error) {
-      Alert.alert('错误', '获取热榜数据失败，请检查网络连接');
-    } finally {
-      setLoadingList(false);
-      setRefreshing(false);
-    }
-  }, []);
+  }, [fetchHotList, showError]);
 
   useEffect(() => {
     fetchSources();
@@ -125,22 +148,35 @@ export default function HomeScreen() {
     }
   }, [selectedSource, fetchHotList]);
 
-  const handleSourceChange = (source: HotListSource) => {
+  const handleSourceChange = useCallback((source: HotListSource) => {
     setSelectedSource(source);
     fetchHotList(source.path);
     setCategoryModalVisible(false);
-  };
+  }, [fetchHotList]);
 
-  const handleItemPress = (item: HotListItem) => {
+  const closeImageModal = useCallback(() => {
+    setImageModalVisible(false);
+    setSelectedImage(null);
+  }, []);
+
+  const closeCategoryModal = useCallback(() => {
+    setCategoryModalVisible(false);
+  }, []);
+
+  const openCategoryModal = useCallback(() => {
+    setCategoryModalVisible(true);
+  }, []);
+
+  const handleItemPress = useCallback((item: HotListItem) => {
     navigation.navigate('WebView', { url: item.url, title: item.title });
-  };
+  }, [navigation]);
 
-  const handleImagePress = (imageUrl: string) => {
+  const handleImagePress = useCallback((imageUrl: string) => {
     setSelectedImage(imageUrl);
     setImageModalVisible(true);
-  };
+  }, []);
 
-  const renderItem = (item: HotListItem, index: number) => (
+  const renderItem = useCallback((item: HotListItem, index: number) => (
     <TouchableOpacity
       key={index}
       style={styles.itemContainer}
@@ -148,7 +184,7 @@ export default function HomeScreen() {
     >
       <Text style={styles.itemRank}>{index + 1}</Text>
       {item.cover && (
-        <TouchableOpacity onPress={() => handleImagePress(item.cover!)}>
+        <TouchableOpacity onPress={() => item.cover && handleImagePress(item.cover)}>
           <Image source={{ uri: item.cover }} style={styles.thumbnail} />
         </TouchableOpacity>
       )}
@@ -161,7 +197,7 @@ export default function HomeScreen() {
         </View>
       </View>
     </TouchableOpacity>
-  );
+  ), [handleItemPress, handleImagePress]);
 
   if (loadingSources) {
     return (
@@ -178,10 +214,12 @@ export default function HomeScreen() {
         animationType="fade"
         transparent={true}
         visible={imageModalVisible}
-        onRequestClose={() => setImageModalVisible(false)}
+        onRequestClose={closeImageModal}
       >
-        <Pressable style={styles.modalContainer} onPress={() => setImageModalVisible(false)}>
-          <Image source={{ uri: selectedImage! }} style={styles.modalImage} resizeMode="contain" />
+        <Pressable style={styles.modalContainer} onPress={closeImageModal}>
+          {selectedImage && (
+            <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+          )}
         </Pressable>
       </Modal>
 
@@ -189,9 +227,9 @@ export default function HomeScreen() {
         animationType="fade"
         transparent={true}
         visible={categoryModalVisible}
-        onRequestClose={() => setCategoryModalVisible(false)}
+        onRequestClose={closeCategoryModal}
       >
-        <Pressable style={styles.categoryModalOverlay} onPress={() => setCategoryModalVisible(false)}>
+        <Pressable style={styles.categoryModalOverlay} onPress={closeCategoryModal}>
           <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
             <Pressable style={styles.categoryModalContent}>
               <Text style={styles.categoryModalTitle}>选择分类</Text>
@@ -244,7 +282,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <TouchableOpacity onPress={() => setCategoryModalVisible(true)} style={styles.moreButton}>
+        <TouchableOpacity onPress={openCategoryModal} style={styles.moreButton}>
           <Ionicons name="chevron-down" size={24} color="#666" />
         </TouchableOpacity>
       </View>
@@ -255,22 +293,24 @@ export default function HomeScreen() {
           <Text style={styles.loadingText}>加载中...</Text>
         </View>
       ) : (
-        <ScrollView
-          style={styles.listContainer}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
-        >
-          {hotListData && hotListData.data ? (
-            <View style={styles.card}>
-              {hotListData.data.map(renderItem)}
-            </View>
-          ) : (
-            <View style={styles.listLoadingContainer}>
-              <Text>暂无数据</Text>
-            </View>
-          )}
-        </ScrollView>
+        hotListData && hotListData.data ? (
+          <FlatList
+            data={hotListData.data}
+            renderItem={({ item, index }) => renderItem(item, index)}
+            keyExtractor={(item, index) => `${item.url}-${index}`}
+            style={styles.listContainer}
+            contentContainerStyle={styles.card}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            showsVerticalScrollIndicator={false}
+            {...PERFORMANCE_CONFIG}
+          />
+        ) : (
+          <View style={styles.listLoadingContainer}>
+            <Text style={styles.loadingText}>暂无数据</Text>
+          </View>
+        )
       )}
     </View>
   );
@@ -279,13 +319,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: COLORS.background,
   },
   listLoadingContainer: {
     flex: 1,
@@ -295,12 +335,12 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textSecondary,
   },
   typeSelectorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -317,31 +357,31 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   typeButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.borderLight,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 10,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: COLORS.border,
   },
   typeButtonActive: {
-    backgroundColor: '#34C759',
-    borderColor: '#34C759',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   typeButtonText: {
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textSecondary,
     fontWeight: '500',
   },
   typeButtonTextActive: {
-    color: 'white',
+    color: COLORS.white,
   },
   listContainer: {
     flex: 1,
   },
   card: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
     margin: 15,
     borderRadius: 12,
     paddingVertical: 10,
@@ -357,12 +397,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: COLORS.borderLight,
   },
   itemRank: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#34C759',
+    color: COLORS.primary,
     width: 30,
   },
   itemContent: {
@@ -371,7 +411,7 @@ const styles = StyleSheet.create({
   },
   itemTitle: {
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
     marginBottom: 4,
   },
   itemMeta: {
@@ -382,17 +422,17 @@ const styles = StyleSheet.create({
   },
   itemHot: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textLight,
     marginRight: 10,
   },
   itemAuthor: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textLight,
     marginRight: 10,
   },
   itemTime: {
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textLight,
   },
   thumbnail: {
     width: 60,
@@ -416,7 +456,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   categoryModalContent: {
-    backgroundColor: 'white',
+    backgroundColor: COLORS.white,
     padding: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -427,6 +467,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
     textAlign: 'center',
+    color: COLORS.text,
   },
   categoryItem: {
     flex: 1,
@@ -434,15 +475,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 10,
     margin: 5,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: COLORS.borderLight,
     borderRadius: 8,
   },
   categoryItemText: {
     fontSize: 14,
-    color: '#333',
+    color: COLORS.text,
   },
   categoryItemTextActive: {
-    color: '#34C759',
+    color: COLORS.primary,
     fontWeight: 'bold',
   },
 });

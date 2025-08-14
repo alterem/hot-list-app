@@ -2,7 +2,6 @@ import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootTabParamList = {
   Home: undefined;
-  Styles: undefined;
   Profile: undefined;
 };
 
@@ -20,7 +19,7 @@ export interface HotListItem {
   title: string;
   url: string;
   hot: string;
-  author: string;
+  author?: string;
   timestamp?: number;
   cover?: string;
 }
