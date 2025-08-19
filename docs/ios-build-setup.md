@@ -105,3 +105,18 @@
 - TestFlight (需要 App Store Connect 配置)
 - 直接安装 (Ad Hoc 配置文件)
 - 企业分发 (Enterprise 证书)
+
+
+
+配置项目禁用代码签名 后 继续构建
+
+```bash
+#pnpm run build-ios
+
+cd ios && xcodebuild -workspace hotlistapp.xcworkspace -scheme hotlistapp -configuration Release -destination generic/platform=iOS -archivePath hotlistapp.xcarchive archive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+```
+
+```bash
+cd ios && mkdir -p build/Payload && cp -r hotlistapp.xcarchive/Products/Applications/hotlistapp.app build/Payload/ && cd
+ build && zip -r hotlistapp.ipa Payload
+```
