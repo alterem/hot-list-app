@@ -4,12 +4,16 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
+    "start:clear": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios:device": "expo run:ios --device",
     "prebuild": "expo prebuild --platform android --clean",
     "prebuild-ios": "expo prebuild --platform ios --clean",
     "build": "cd android && ./gradlew assembleRelease",
-    "build-ios": "cd ios && xcodebuild -project hotlistapp.xcodeproj -scheme hotlistapp -configuration Release -destination generic/platform=iOS -archivePath hotlistapp.xcarchive archive"
+    "build-ios": "cd ios && xcodebuild -project hotlistapp.xcodeproj -scheme hotlistapp -configuration Release -destination generic/platform=iOS -archivePath hotlistapp.xcarchive archive",
+    "build-ios-debug": "cd ios && xcodebuild -project hotlistapp.xcodeproj -scheme hotlistapp -configuration Debug -destination generic/platform=iOS -archivePath hotlistapp-debug.xcarchive archive",
+    "reset-cache": "expo start --clear && watchman watch-del-all && rm -rf node_modules && pnpm install"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
